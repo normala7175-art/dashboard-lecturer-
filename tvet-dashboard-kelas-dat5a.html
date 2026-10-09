@@ -1,0 +1,497 @@
+
+<html lang="ms">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TVET Dashboard – DAT5A</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 64px;
+    background: #0b1222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 28px;
+    border-right: 1px solid #1e2d45;
+    flex-shrink: 0;
+  }
+  .sidebar .logo {
+    width: 36px; height: 36px;
+    background: #0ea5e9;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px; color: #fff; letter-spacing: -1px;
+  }
+  .nav-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: background 0.2s, color 0.2s;
+    font-size: 17px;
+  }
+  .nav-icon:hover { background: #1e2d45; color: #0ea5e9; }
+  .nav-icon.active { background: #0ea5e9; color: #fff; }
+  .sidebar-spacer { flex: 1; }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: #0b1222;
+    border-bottom: 1px solid #1e2d45;
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-left { display: flex; flex-direction: column; gap: 1px; }
+  .topbar-title {
+    font-size: 16px; font-weight: 700;
+    color: #f1f5f9; letter-spacing: 0.5px;
+  }
+  .topbar-sub {
+    font-size: 10px; font-weight: 600;
+    color: #0ea5e9; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .topbar-right {
+    display: flex; align-items: center; gap: 18px;
+  }
+  .badge-pill {
+    background: #1e2d45; border: 1px solid #2d4a6e;
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 11px; color: #94a3b8;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #0ea5e9;
+  }
+  .time-badge {
+    font-size: 11px; color: #64748b;
+    background: #0f172a; border: 1px solid #1e2d45;
+    border-radius: 6px; padding: 4px 10px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+  }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    flex: 1;
+    padding: 24px 28px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 10px; font-weight: 700;
+    color: #0ea5e9; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: -8px;
+  }
+
+  /* ── CARDS ROW ── */
+  .cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 300px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* ── CARD BASE ── */
+  .card {
+    background: #131f35;
+    border: 1px solid #1e2d45;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title {
+    font-size: 10px; font-weight: 700;
+    color: #0ea5e9; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .card-icon {
+    width: 28px; height: 28px;
+    background: #0ea5e91a;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ── CARD 1: STUDENTS ── */
+  .students-count {
+    font-size: 28px; font-weight: 800; color: #f1f5f9; line-height: 1;
+  }
+  .students-sub {
+    font-size: 11px; color: #64748b; margin-top: 2px;
+  }
+  .donut-wrap {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .donut-svg { flex-shrink: 0; }
+  .donut-label { display: flex; flex-direction: column; gap: 2px; }
+  .donut-pct { font-size: 20px; font-weight: 800; color: #0ea5e9; }
+  .donut-text { font-size: 10px; color: #64748b; }
+  .student-list { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+  .student-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: #94a3b8;
+  }
+  .student-av {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #1e2d45; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #0ea5e9;
+  }
+
+  /* ── CARD 2: TASKS ── */
+  .task-pct { font-size: 28px; font-weight: 800; color: #f1f5f9; line-height: 1; }
+  .task-pct-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .progress-bar-wrap {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .progress-bar-bg {
+    width: 100%; height: 8px; background: #1e2d45; border-radius: 999px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+  }
+  .progress-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: #64748b;
+  }
+  .task-stat {
+    font-size: 11px; color: #94a3b8;
+    background: #0f172a; border: 1px solid #1e2d45;
+    border-radius: 8px; padding: 8px 12px;
+    display: flex; justify-content: space-between;
+  }
+  .task-stat span { color: #0ea5e9; font-weight: 700; }
+  .task-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .task-tag {
+    font-size: 10px; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px;
+    border: 1px solid #2d4a6e; color: #0ea5e9; background: #0ea5e90f;
+  }
+
+  /* ── CARD 3: WORKSHOP ── */
+  .ws-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #052e16; border: 1px solid #16a34a;
+    color: #4ade80; font-size: 10px; font-weight: 700;
+    padding: 5px 11px; border-radius: 999px; letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .ws-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+  .ws-info { display: flex; flex-direction: column; gap: 10px; }
+  .ws-row {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .ws-row-label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+  .ws-row-value { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .ws-divider { height: 1px; background: #1e2d45; }
+  .ws-icon-row {
+    display: flex; align-items: center; gap: 8px; font-size: 11px; color: #94a3b8;
+  }
+  .ws-icon-box {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: #0ea5e91a; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+
+  /* ── CHECKLIST CARD ── */
+  .checklist-card {
+    background: #131f35;
+    border: 1px solid #1e2d45;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .checklist-title {
+    font-size: 10px; font-weight: 700;
+    color: #0ea5e9; letter-spacing: 1.5px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .checklist-items { display: flex; flex-direction: column; gap: 10px; }
+  .cl-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px;
+  }
+  .cl-box {
+    width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .cl-box.checked { background: #0ea5e9; color: #fff; border: 1.5px solid #0ea5e9; }
+  .cl-box.unchecked { background: transparent; border: 1.5px solid #334155; }
+  .cl-text.done { color: #64748b; text-decoration: line-through; }
+  .cl-text.pending { color: #cbd5e1; }
+  .cl-progress-wrap { margin-top: 4px; }
+  .cl-progress-bg { width: 100%; height: 5px; background: #1e2d45; border-radius: 999px; overflow: hidden; }
+  .cl-progress-fill { height: 100%; border-radius: 999px; background: #0ea5e9; width: 60%; }
+  .cl-progress-label { font-size: 10px; color: #64748b; margin-top: 5px; text-align: right; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 11px;
+    color: #334155;
+    border-top: 1px solid #1e2d45;
+    background: #0b1222;
+    flex-shrink: 0;
+  }
+  .footer span { color: #0ea5e9; }
+</style>
+</head>
+<body>
+
+
+<nav class="sidebar">
+  <div class="logo">TV</div>
+  <div class="nav-icon active" title="Dashboard">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+  </div>
+  <div class="nav-icon" title="Pelajar">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+  </div>
+  <div class="nav-icon" title="Tugasan">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+  </div>
+  <div class="nav-icon" title="Bengkel">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><line x1="12" y1="12" x2="12" y2="16"></line><line x1="10" y1="14" x2="14" y2="14"></line></svg>
+  </div>
+  <div class="nav-icon" title="Laporan">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+  </div>
+  <div class="sidebar-spacer"></div>
+  <div class="nav-icon" title="Tetapan">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  </div>
+</nav>
+
+
+<div class="main">
+
+  
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">TVET DASHBOARD — KELAS DAT5A</div>
+      <div class="topbar-sub">Kursus: Audit 2</div>
+    </div>
+    <div class="topbar-right">
+      <div class="badge-pill"><div class="dot"></div> Sesi Aktif</div>
+      <div class="time-badge">Sem 2  |  2024/2025</div>
+      <div class="avatar">FA</div>
+    </div>
+  </header>
+
+  
+  <div class="content">
+
+    <div class="section-label">Papan Pemuka Utama</div>
+
+    
+    <div class="cards-row">
+
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👤 Pelajar (Students)</div>
+          <div class="card-icon">👥</div>
+        </div>
+        <div>
+          <div class="students-count">28</div>
+          <div class="students-sub">Jumlah: 28 Aktif</div>
+        </div>
+        <div class="donut-wrap">
+          
+          <svg class="donut-svg" width="60" height="60">
+            <circle cx="30" cy="30" r="24" fill="none" stroke="#1e2d45" stroke-width="8"></circle>
+            <circle cx="30" cy="30" r="24" fill="none" stroke="#0ea5e9" stroke-width="8" stroke-linecap="round" transform="rotate(-90 30 30)"></circle>
+            <text x="30" y="34" text-anchor="middle" fill="#f1f5f9" font-size="10" font-weight="800" font-family="Segoe UI,sans-serif">95%</text>
+          </svg>
+          <div class="donut-label">
+            <div class="donut-pct">95%</div>
+            <div class="donut-text">Kadar Kehadiran</div>
+          </div>
+        </div>
+        <div class="student-list">
+          <div class="student-item"><div class="student-av">AI</div> Aiman bin Abu</div>
+          <div class="student-item"><div class="student-av">NS</div> Nurul Safiah</div>
+          <div class="student-item"><div class="student-av">MF</div> Muhammad Faiz</div>
+          <div class="student-item"><div class="student-av">SA</div> Siti Aminah</div>
+        </div>
+      </div>
+
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Tugasan (Tasks)</div>
+          <div class="card-icon">✅</div>
+        </div>
+        <div>
+          <div class="task-pct">75%</div>
+          <div class="task-pct-sub">Progression Keseluruhan</div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:75%"></div>
+          </div>
+          <div class="progress-bar-label">
+            <span>0%</span><span>75%</span><span>100%</span>
+          </div>
+        </div>
+        <div class="task-stat">
+          <span>✓ Selesai: <span>12</span></span>
+          <span>◯ Belum Selesai: <span>4</span></span>
+        </div>
+        <div class="task-tags">
+          <div class="task-tag">Amalan Audit 1</div>
+          <div class="task-tag">Tugasan Berkumpulan</div>
+          <div class="task-tag">Laporan Individu</div>
+        </div>
+      </div>
+
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏭 Status Bengkel</div>
+          <div class="card-icon" style="background:#16a34a22">🔧</div>
+        </div>
+        <div>
+          <div class="ws-badge"><div class="dot"></div> AKTIF / SEDANG DIGUNAKAN</div>
+        </div>
+        <div class="ws-info">
+          <div class="ws-row">
+            <div class="ws-row-label">Lokasi Bengkel</div>
+            <div class="ws-row-value">
+              <span style="margin-right:6px">📍</span>Audit Lab 5
+            </div>
+          </div>
+          <div class="ws-divider"></div>
+          <div class="ws-row">
+            <div class="ws-row-label">Sesi Semasa</div>
+            <div class="ws-row-value">
+              <span style="margin-right:6px">📄</span>Amalan Praktikal Audit
+            </div>
+          </div>
+          <div class="ws-divider"></div>
+          <div class="ws-icon-row">
+            <div class="ws-icon-box">🕑</div>
+            <span>Masa Operasi: 08:00 – 17:00</span>
+          </div>
+          <div class="ws-icon-row">
+            <div class="ws-icon-box">👥</div>
+            <span>Kapasiti: 30 Pelajar</span>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="checklist-card">
+        <div class="checklist-title">
+          <svg width="14" height="14" fill="none" stroke="#0ea5e9" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          Senarai Semak (Checklist)
+        </div>
+        <div class="checklist-items">
+          <div class="cl-item">
+            <div class="cl-box checked">✓</div>
+            <span class="cl-text done">Tell Bob the goal</span>
+          </div>
+          <div class="cl-item">
+            <div class="cl-box checked">✓</div>
+            <span class="cl-text done">Review the plan</span>
+          </div>
+          <div class="cl-item">
+            <div class="cl-box checked">✓</div>
+            <span class="cl-text done">Confirm workshop readiness</span>
+          </div>
+          <div class="cl-item">
+            <div class="cl-box unchecked"></div>
+            <span class="cl-text pending">Approve build</span>
+          </div>
+          <div class="cl-item">
+            <div class="cl-box unchecked"></div>
+            <span class="cl-text pending">Test the result</span>
+          </div>
+        </div>
+        <div class="cl-progress-wrap">
+          <div class="cl-progress-bg">
+            <div class="cl-progress-fill"></div>
+          </div>
+          <div class="cl-progress-label">3 / 5 selesai (60%)</div>
+        </div>
+        <div style="font-size:10px;color:#64748b;line-height:1.6;margin-top:4px;padding-top:10px;border-top:1px solid #1e2d45">
+          Kemaskini terakhir:<br />
+          <span style="color:#0ea5e9;font-weight:600">Hari ini, 08:45 AM</span>
+        </div>
+      </div>
+
+    </div>
+
+    
+    <div style="background:#131f35;border:1px solid #1e2d45;border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:18px">
+        <div style="font-size:11px;color:#64748b">
+          <span style="color:#0ea5e9;font-weight:700">■ Pensyarah:</span>  En. Fadzli Ahmad
+        </div>
+        <div style="width:1px;height:16px;background:#1e2d45"></div>
+        <div style="font-size:11px;color:#64748b">
+          <span style="color:#0ea5e9;font-weight:700">■ Program:</span>  Diploma Perakaunan
+        </div>
+        <div style="width:1px;height:16px;background:#1e2d45"></div>
+        <div style="font-size:11px;color:#64748b">
+          <span style="color:#0ea5e9;font-weight:700">■ Tahap:</span>  Diploma (Level 4)
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#4ade80"></div>
+        <span style="font-size:11px;color:#4ade80;font-weight:600">Sistem Aktif</span>
+      </div>
+    </div>
+
+  </div>
+
+  
+  <div class="footer">
+    Made with <span>IBM Bob</span>
+  </div>
+
+</div>
+
+</body>
+</html>
