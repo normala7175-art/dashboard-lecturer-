@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TVET Dashboard – Pensyarah Jabatan</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh;font-size:13px}
+  /* TOPBAR */
+  .topbar{background:#1a1d27;border-bottom:1px solid #2d3148;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .topbar-logo{width:32px;height:32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .topbar-title h1{font-size:14px;font-weight:700;color:#f1f5f9;letter-spacing:.5px}
+  .topbar-title p{font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:5px}
+  .edit-btn-inline{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:12px;padding:2px 4px;border-radius:4px;transition:.2s}
+  .edit-btn-inline:hover{color:#6366f1;background:#1e2035}
+  .topbar-right{display:flex;align-items:center;gap:10px}
+  .search-box{background:#252840;border:1px solid #2d3148;border-radius:8px;padding:6px 12px;color:#e2e8f0;font-size:12px;width:180px;outline:none}
+  .search-box::placeholder{color:#475569}
+  .search-box:focus{border-color:#6366f1}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer}
+  .notif-btn{background:#252840;border:1px solid #2d3148;border-radius:8px;padding:6px 10px;color:#94a3b8;cursor:pointer;font-size:14px;transition:.2s}
+  .notif-btn:hover{color:#f1f5f9;border-color:#6366f1}
+
+  /* LAYOUT */
+  .main{display:grid;grid-template-columns:280px 1fr 220px;grid-template-rows:auto auto;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+
+  /* SECTION HEADERS */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .section-title{font-size:11px;font-weight:700;letter-spacing:.8px;color:#94a3b8;text-transform:uppercase}
+  .add-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:600;transition:.2s}
+  .add-btn:hover{filter:brightness(1.15)}
+
+  /* CARDS */
+  .card{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:14px}
+
+  /* ZONE 1 – KURSUS */
+  .zone-kursus{grid-column:1;grid-row:1/3}
+  .kursus-item{background:#252840;border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid #2d3148;transition:.2s}
+  .kursus-item:hover{border-color:#6366f1;background:#2a2d45}
+  .kursus-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .kursus-name{font-size:12px;font-weight:700;color:#f1f5f9;flex:1}
+  .kursus-actions{display:flex;align-items:center;gap:6px}
+  .selesai-badge{font-size:9px;padding:2px 7px;border-radius:20px;background:#052e16;color:#4ade80;border:1px solid #166534;white-space:nowrap}
+  .icon-btn{background:none;border:none;cursor:pointer;color:#475569;font-size:12px;padding:3px;border-radius:4px;transition:.2s}
+  .icon-btn:hover{color:#6366f1;background:#1e2035}
+  .tag-row{display:flex;flex-wrap:wrap;gap:5px}
+  .tag{padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;border:none;transition:.2s}
+  .tag:hover{filter:brightness(1.2);transform:translateY(-1px)}
+  .tag-pink{background:#4a1535;color:#f9a8d4}
+  .tag-orange{background:#431407;color:#fdba74}
+  .tag-blue{background:#0c1a4a;color:#93c5fd}
+  .tag-green{background:#052e16;color:#86efac}
+  .tag-red{background:#450a0a;color:#fca5a5}
+  .tag-brown{background:#292524;color:#d6b99a}
+  .tag-purple{background:#2e1065;color:#c4b5fd}
+
+  /* ZONE 2 – TUGASAN SAMPINGAN */
+  .zone-tugasan{grid-column:2;grid-row:1}
+  .tugasan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tugasan-card{background:#252840;border-radius:10px;padding:12px;border:1px solid #2d3148;transition:.2s}
+  .tugasan-card:hover{border-color:#6366f1;background:#2a2d45}
+  .tugasan-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+  .tugasan-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .tugasan-info{flex:1;margin:0 8px}
+  .tugasan-title{font-size:11px;font-weight:700;color:#f1f5f9;line-height:1.3;margin-bottom:2px}
+  /* toggle */
+  .toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0}
+  .toggle-slider{position:absolute;inset:0;border-radius:20px;background:#374151;cursor:pointer;transition:.3s}
+  .toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;border-radius:50%;background:#9ca3af;transition:.3s}
+  .toggle input:checked+.toggle-slider{background:#22c55e}
+  .toggle input:checked+.toggle-slider::before{transform:translateX(16px);background:#fff}
+
+  /* ZONE 3 – STATUS KELAS */
+  .zone-status{grid-column:2;grid-row:2}
+  .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .status-card{background:#252840;border-radius:10px;padding:14px;border:1px solid #2d3148}
+  .status-label{font-size:10px;font-weight:700;letter-spacing:.6px;color:#94a3b8;text-transform:uppercase;margin-bottom:10px}
+  .student-count{font-size:22px;font-weight:800;color:#f1f5f9}
+  .student-sub{font-size:11px;color:#4ade80;margin-bottom:10px}
+  .donut-wrap{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  svg.donut{transform:rotate(-90deg)}
+  .donut-label{font-size:13px;font-weight:700;color:#f1f5f9}
+  .donut-sub{font-size:10px;color:#94a3b8}
+  .student-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+  .student-chip{background:#1e2035;border:1px solid #2d3148;border-radius:20px;padding:2px 9px;font-size:10px;color:#cbd5e1}
+  .urus-btn{background:#6366f1;border:none;border-radius:7px;padding:6px 14px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+  .urus-btn:hover{background:#4f46e5}
+  /* workshop */
+  .badge-active{display:inline-flex;align-items:center;gap:5px;background:#052e16;color:#4ade80;border:1px solid #166534;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;margin-bottom:8px}
+  .badge-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .ws-detail{font-size:11px;color:#94a3b8;margin-bottom:4px}
+  .ws-detail span{color:#e2e8f0;font-weight:600}
+  .ubah-btn{margin-top:8px;background:#f59e0b;border:none;border-radius:7px;padding:6px 14px;color:#0f1117;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+  .ubah-btn:hover{background:#d97706}
+
+  /* ZONE 4 – CHECKLIST */
+  .zone-checklist{grid-column:3;grid-row:1/3}
+  .checklist-item{display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:9px;margin-bottom:8px;background:#252840;border:1px solid #2d3148;cursor:pointer;transition:.2s}
+  .checklist-item:hover{border-color:#6366f1;background:#2a2d45}
+  .checklist-item.done{background:#052e16;border-color:#166534}
+  .checklist-item.done .cl-text{color:#4ade80;text-decoration:line-through;text-decoration-color:#166534}
+  .cl-check{width:18px;height:18px;border-radius:5px;border:2px solid #374151;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;margin-top:1px}
+  .checklist-item.done .cl-check{background:#22c55e;border-color:#22c55e;color:#fff;font-size:11px}
+  .cl-text{font-size:12px;font-weight:600;color:#e2e8f0;line-height:1.4}
+  .cl-sub{font-size:10px;color:#64748b;margin-top:2px}
+
+  /* PROGRESS */
+  .progress-bar{height:5px;background:#1e2035;border-radius:10px;overflow:hidden;margin-top:6px}
+  .progress-fill{height:100%;border-radius:10px;transition:.3s}
+
+  /* SCROLLABLE */
+  .scroll-area{max-height:calc(100vh - 130px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2d3148 transparent}
+  .scroll-area::-webkit-scrollbar{width:4px}
+  .scroll-area::-webkit-scrollbar-thumb{background:#2d3148;border-radius:4px}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:20px;width:360px;max-width:95vw}
+  .modal h3{font-size:14px;font-weight:700;margin-bottom:14px;color:#f1f5f9}
+  .modal input,.modal select{width:100%;background:#252840;border:1px solid #2d3148;border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:12px;margin-bottom:10px;outline:none}
+  .modal input:focus,.modal select:focus{border-color:#6366f1}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+  .btn-cancel{background:#252840;border:1px solid #2d3148;border-radius:7px;padding:7px 16px;color:#94a3b8;font-size:12px;cursor:pointer}
+  .btn-save{background:#6366f1;border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+  .btn-save:hover{background:#4f46e5}
+
+  /* RESPONSIVE */
+  @media(max-width:1100px){.main{grid-template-columns:250px 1fr 200px}}
+  @media(max-width:900px){.main{grid-template-columns:1fr 1fr};.zone-kursus{grid-column:1/3;grid-row:auto};.zone-checklist{grid-column:1/3}}
+  @media(max-width:600px){.main{grid-template-columns:1fr};.zone-kursus,.zone-tugasan,.zone-status,.zone-checklist{grid-column:1};.tugasan-grid,.status-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">🎓</div>
+    <div class="topbar-title">
+      <h1>TVET DASHBOARD – PENSYARAH JABATAN</h1>
+      <p>TUGAS HAKIKI PdP &amp; TUGAS SAMPINGAN <button class="edit-btn-inline" onclick="openModal('edit-title')" title="Edit tajuk">✏️</button></p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <input class="search-box" type="text" placeholder="🔍  Cari tugasan, kursus..."/>
+    <button class="notif-btn" title="Notifikasi">🔔</button>
+    <div class="avatar" title="Pensyarah">P</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main">
+
+  <!-- ═══════════════ ZONE 1: KURSUS ═══════════════ -->
+  <div class="zone-kursus card">
+    <div class="section-header">
+      <span class="section-title">📚 Kad Kursus Yang Diajar</span>
+      <button class="add-btn" style="background:#6366f1;color:#fff" onclick="openModal('tambah-kursus')">＋ Tambah Kursus</button>
+    </div>
+    <div class="scroll-area" id="kursus-list">
+
+      <!-- AUDIT KELAS A -->
+      <div class="kursus-item">
+        <div class="kursus-header">
+          <span class="kursus-name">AUDIT KELAS A</span>
+          <div class="kursus-actions">
+            <span class="selesai-badge">✔ SELESAI MARKING</span>
+            <button class="icon-btn" title="Edit">✏️</button>
+          </div>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Quiz</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Test</button>
+          <button class="tag tag-blue" onclick="markDone(this)">Problem Case</button>
+          <button class="tag tag-green" onclick="markDone(this)">Mini Projek</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:75%;background:#6366f1"></div></div>
+      </div>
+
+      <!-- AUDIT KELAS B -->
+      <div class="kursus-item">
+        <div class="kursus-header">
+          <span class="kursus-name">AUDIT KELAS B</span>
+          <div class="kursus-actions">
+            <span class="selesai-badge">✔ SELESAI MARKING</span>
+            <button class="icon-btn" title="Edit">✏️</button>
+          </div>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Quiz</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Test</button>
+          <button class="tag tag-blue" onclick="markDone(this)">Problem Case</button>
+          <button class="tag tag-green" onclick="markDone(this)">Mini Projek</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%;background:#f59e0b"></div></div>
+      </div>
+
+      <!-- AIS -->
+      <div class="kursus-item">
+        <div class="kursus-header">
+          <span class="kursus-name">ACCOUNTING INFORMATION SYSTEM</span>
+          <div class="kursus-actions">
+            <span class="selesai-badge">✔ SELESAI MARKING</span>
+            <button class="icon-btn" title="Edit">✏️</button>
+          </div>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-red" onclick="markDone(this)">Practical Test</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Lab Exercise 1</button>
+          <button class="tag tag-brown" onclick="markDone(this)">Lab Exercise 2</button>
+          <button class="tag tag-blue" onclick="markDone(this)">Quiz</button>
+          <button class="tag tag-purple" onclick="markDone(this)">Test</button>
+          <button class="tag tag-green" onclick="markDone(this)">Presentation</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:60%;background:#8b5cf6"></div></div>
+      </div>
+
+      <!-- FINANCIAL ACCOUNTING -->
+      <div class="kursus-item">
+        <div class="kursus-header">
+          <span class="kursus-name">FINANCIAL ACCOUNTING</span>
+          <div class="kursus-actions">
+            <span class="selesai-badge">✔ SELESAI MARKING</span>
+            <button class="icon-btn" title="Edit">✏️</button>
+          </div>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Quiz</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Test</button>
+          <button class="tag tag-purple" onclick="markDone(this)">Practical Exercise</button>
+          <button class="tag tag-green" onclick="markDone(this)">Case Study</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:90%;background:#22c55e"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════ ZONE 2: TUGASAN SAMPINGAN ═══════════════ -->
+  <div class="zone-tugasan card">
+    <div class="section-header">
+      <span class="section-title">🗂️ Tugasan Sampingan</span>
+      <button class="add-btn" style="background:#f59e0b;color:#0f1117" onclick="openModal('tambah-tugasan')">＋ Tambah</button>
+    </div>
+    <div class="tugasan-grid">
+
+      <!-- 1 -->
+      <div class="tugasan-card">
+        <div class="tugasan-top">
+          <div class="tugasan-icon" style="background:#0c1a4a">📁</div>
+          <div class="tugasan-info">
+            <div class="tugasan-title">Penyelaras Aset Jabatan</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Semak KEW-PA7|BK1|BK2|BK3|BK4|DK1|DK2</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Update Senarai Lupus</button>
+          <button class="tag tag-blue" onclick="markDone(this)">Update Fail Log Pergerakan Inventori</button>
+          <button class="tag tag-green" onclick="markDone(this)">Permohonan Inventori Baru</button>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="tugasan-card">
+        <div class="tugasan-top">
+          <div class="tugasan-icon" style="background:#052e16">👤</div>
+          <div class="tugasan-info">
+            <div class="tugasan-title">Pensyarah Penasihat Akademik</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Update Aktiviti PA</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Update Maklumbalas SPAK</button>
+          <button class="tag tag-blue" onclick="markDone(this)">Kehadiran kurang 80%</button>
+          <button class="tag tag-green" onclick="markDone(this)">Pembayaran Yuran</button>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="tugasan-card">
+        <div class="tugasan-top">
+          <div class="tugasan-icon" style="background:#431407">👥</div>
+          <div class="tugasan-info">
+            <div class="tugasan-title">Penasihat Commerce Society Club</div>
+          </div>
+          <label class="toggle"><input type="checkbox" onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Majlis Penyampaian AKJ</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Program BKS</button>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="tugasan-card">
+        <div class="tugasan-top">
+          <div class="tugasan-icon" style="background:#2e1065">🏛️</div>
+          <div class="tugasan-info">
+            <div class="tugasan-title">Penyelaras PSH Institusi</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">PSH-JKA</button>
+          <button class="tag tag-orange" onclick="markDone(this)">PSH-JKM</button>
+          <button class="tag tag-blue" onclick="markDone(this)">PSH-JP</button>
+          <button class="tag tag-green" onclick="markDone(this)">PSH-JKE</button>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="tugasan-card">
+        <div class="tugasan-top">
+          <div class="tugasan-icon" style="background:#3b2700">🔑</div>
+          <div class="tugasan-info">
+            <div class="tugasan-title">Penyelaras Aset Amanah</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Senarai Aset</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Label Aset</button>
+          <button class="tag tag-blue" onclick="markDone(this)">Selenggara Aset</button>
+          <button class="tag tag-green" onclick="markDone(this)">Pelupusan Aset</button>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="tugasan-card">
+        <div class="tugasan-top">
+          <div class="tugasan-icon" style="background:#450a0a">🏅</div>
+          <div class="tugasan-info">
+            <div class="tugasan-title">JK Penyelaras Kualiti Jabatan</div>
+          </div>
+          <label class="toggle"><input type="checkbox" onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="tag-row">
+          <button class="tag tag-pink" onclick="markDone(this)">Semak FPK</button>
+          <button class="tag tag-orange" onclick="markDone(this)">Taklimat RM</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════ ZONE 4: CHECKLIST (right) ═══════════════ -->
+  <div class="zone-checklist card">
+    <div class="section-header">
+      <span class="section-title">✅ Senarai Semak</span>
+      <button class="add-btn" style="background:#22c55e;color:#0f1117" onclick="openModal('tambah-checklist')">＋ Tambah</button>
+    </div>
+    <div id="checklist-list">
+
+      <div class="checklist-item done" onclick="toggleCheck(this)">
+        <div class="cl-check">✓</div>
+        <div>
+          <div class="cl-text">Tugas Hakiki – PdP</div>
+          <div class="cl-sub">Selesai ✔</div>
+        </div>
+      </div>
+
+      <div class="checklist-item done" onclick="toggleCheck(this)">
+        <div class="cl-check">✓</div>
+        <div>
+          <div class="cl-text">Tugas Sampingan</div>
+          <div class="cl-sub">Selesai ✔</div>
+        </div>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="cl-check"></div>
+        <div>
+          <div class="cl-text">Kemaskini Rekod Pelajar</div>
+          <div class="cl-sub">Belum selesai</div>
+        </div>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="cl-check"></div>
+        <div>
+          <div class="cl-text">Hantar Laporan Bulanan</div>
+          <div class="cl-sub">Belum selesai</div>
+        </div>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="cl-check"></div>
+        <div>
+          <div class="cl-text">Semak Kehadiran Pelajar</div>
+          <div class="cl-sub">Belum selesai</div>
+        </div>
+      </div>
+
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="cl-check"></div>
+        <div>
+          <div class="cl-text">Kemaskini Fail Kursus</div>
+          <div class="cl-sub">Belum selesai</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Progress Summary -->
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2d3148">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:6px">
+        <span>Kemajuan Checklist</span>
+        <span id="cl-percent">33%</span>
+      </div>
+      <div class="progress-bar" style="height:7px">
+        <div class="progress-fill" id="cl-progress" style="width:33%;background:#22c55e"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ZONE 3: STATUS KELAS ═══════════════ -->
+  <div class="zone-status card" style="grid-column:2;grid-row:2">
+    <div class="section-header">
+      <span class="section-title">🏫 Status Kelas &amp; Bengkel DAT5A</span>
+    </div>
+    <div class="status-grid">
+
+      <!-- Pelajar -->
+      <div class="status-card">
+        <div class="status-label">👩‍🎓 Pelajar (Students)</div>
+        <div class="student-count">28</div>
+        <div class="student-sub">Jumlah Aktif</div>
+        <div class="donut-wrap">
+          <svg class="donut" width="52" height="52" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="20" fill="none" stroke="#1e2035" stroke-width="7"/>
+            <circle cx="26" cy="26" r="20" fill="none" stroke="#6366f1" stroke-width="7"
+              stroke-dasharray="119 126" stroke-linecap="round"/>
+          </svg>
+          <div>
+            <div class="donut-label">95%</div>
+            <div class="donut-sub">Kehadiran</div>
+          </div>
+        </div>
+        <div class="student-chips">
+          <span class="student-chip">Aiman</span>
+          <span class="student-chip">Nurul</span>
+          <span class="student-chip">Hafiz</span>
+          <span class="student-chip">Siti</span>
+          <span class="student-chip">Izzat</span>
+          <span class="student-chip">Farah</span>
+          <span class="student-chip">+22 lagi</span>
+        </div>
+        <button class="urus-btn" onclick="openModal('urus-pelajar')">Urus Pelajar</button>
+      </div>
+
+      <!-- Workshop -->
+      <div class="status-card">
+        <div class="status-label">🔧 Status Bengkel (Workshop Status)</div>
+        <div class="badge-active"><span class="badge-dot"></span>AKTIF / SEDANG DIGUNAKAN</div>
+        <div class="ws-detail">Lokasi: <span>Lab 5</span></div>
+        <div class="ws-detail">Sesi Semasa: <span>Praktikal AutoCount-iCloud</span></div>
+        <div class="ws-detail">Kapasiti: <span>28 / 30</span></div>
+        <div class="ws-detail">Masa: <span>8:00 AM – 10:00 AM</span></div>
+        <button class="ubah-btn" onclick="openModal('ubah-status')">Ubah Status</button>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- end .main -->
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+<div class="modal-overlay" id="modal-tambah-kursus">
+  <div class="modal">
+    <h3>➕ Tambah Kursus Baru</h3>
+    <input type="text" placeholder="Nama Kursus" id="new-kursus-name"/>
+    <input type="text" placeholder="Tag (pisah dengan koma, cth: Quiz,Test)" id="new-kursus-tags"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('tambah-kursus')">Batal</button>
+      <button class="btn-save" onclick="addKursus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-tambah-tugasan">
+  <div class="modal">
+    <h3>➕ Tambah Tugasan Sampingan</h3>
+    <input type="text" placeholder="Nama Tugasan" id="new-tugasan-name"/>
+    <input type="text" placeholder="Tag (pisah dengan koma)" id="new-tugasan-tags"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('tambah-tugasan')">Batal</button>
+      <button class="btn-save" onclick="addTugasan()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-tambah-checklist">
+  <div class="modal">
+    <h3>➕ Tambah Item Checklist</h3>
+    <input type="text" placeholder="Nama item..." id="new-cl-name"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('tambah-checklist')">Batal</button>
+      <button class="btn-save" onclick="addChecklist()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-edit-title">
+  <div class="modal">
+    <h3>✏️ Edit Sub-Tajuk</h3>
+    <input type="text" placeholder="Sub-tajuk baru..." id="new-subtitle" value="TUGAS HAKIKI PdP & TUGAS SAMPINGAN"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('edit-title')">Batal</button>
+      <button class="btn-save" onclick="saveSubtitle()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-urus-pelajar">
+  <div class="modal">
+    <h3>👩‍🎓 Urus Pelajar</h3>
+    <input type="text" placeholder="Cari nama pelajar..."/>
+    <p style="font-size:11px;color:#64748b;margin-bottom:8px">28 pelajar aktif dalam kelas DAT5A</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('urus-pelajar')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ubah-status">
+  <div class="modal">
+    <h3>🔧 Ubah Status Bengkel</h3>
+    <select id="ws-status-select">
+      <option value="aktif">AKTIF / SEDANG DIGUNAKAN</option>
+      <option value="kosong">KOSONG / TIDAK DIGUNAKAN</option>
+      <option value="selenggara">PENYELENGGARAAN</option>
+      <option value="ditutup">DITUTUP</option>
+    </select>
+    <input type="text" placeholder="Sesi / Aktiviti semasa..." id="ws-sesi"/>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('ubah-status')">Batal</button>
+      <button class="btn-save" onclick="saveWsStatus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Modal helpers ── */
+function openModal(id){document.getElementById('modal-'+id).classList.add('open')}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}))
+
+/* ── Tag click = mark done ── */
+function markDone(btn){
+  btn.classList.toggle('done-tag')
+  if(btn.classList.contains('done-tag')){
+    btn.style.textDecoration='line-through'
+    btn.style.opacity='0.5'
+  } else {
+    btn.style.textDecoration=''
+    btn.style.opacity=''
+  }
+}
+
+/* ── Toggle tugasan card opacity ── */
+function toggleTugasan(cb){
+  const card=cb.closest('.tugasan-card')
+  card.style.opacity=cb.checked?'1':'0.45'
+}
+
+/* ── Checklist toggle ── */
+function toggleCheck(item){
+  item.classList.toggle('done')
+  const check=item.querySelector('.cl-check')
+  const sub=item.querySelector('.cl-sub')
+  if(item.classList.contains('done')){
+    check.textContent='✓'
+    sub.textContent='Selesai ✔'
+  } else {
+    check.textContent=''
+    sub.textContent='Belum selesai'
+  }
+  updateClProgress()
+}
+function updateClProgress(){
+  const items=document.querySelectorAll('#checklist-list .checklist-item')
+  const done=document.querySelectorAll('#checklist-list .checklist-item.done').length
+  const pct=Math.round((done/items.length)*100)
+  document.getElementById('cl-percent').textContent=pct+'%'
+  document.getElementById('cl-progress').style.width=pct+'%'
+}
+
+/* ── Add Kursus ── */
+function addKursus(){
+  const name=document.getElementById('new-kursus-name').value.trim()
+  const tags=document.getElementById('new-kursus-tags').value.trim()
+  if(!name)return
+  const colors=['tag-pink','tag-orange','tag-blue','tag-green','tag-purple','tag-red']
+  const tagHTML=(tags?tags.split(','):[]).map((t,i)=>`<button class="tag ${colors[i%colors.length]}" onclick="markDone(this)">${t.trim()}</button>`).join('')
+  const html=`<div class="kursus-item">
+    <div class="kursus-header">
+      <span class="kursus-name">${name}</span>
+      <div class="kursus-actions">
+        <span class="selesai-badge">✔ SELESAI MARKING</span>
+        <button class="icon-btn">✏️</button>
+      </div>
+    </div>
+    <div class="tag-row">${tagHTML}</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:0%;background:#6366f1"></div></div>
+  </div>`
+  document.getElementById('kursus-list').insertAdjacentHTML('beforeend',html)
+  document.getElementById('new-kursus-name').value=''
+  document.getElementById('new-kursus-tags').value=''
+  closeModal('tambah-kursus')
+}
+
+/* ── Add Tugasan ── */
+function addTugasan(){
+  const name=document.getElementById('new-tugasan-name').value.trim()
+  const tags=document.getElementById('new-tugasan-tags').value.trim()
+  if(!name)return
+  const colors=['tag-pink','tag-orange','tag-blue','tag-green']
+  const tagHTML=(tags?tags.split(','):[]).map((t,i)=>`<button class="tag ${colors[i%colors.length]}" onclick="markDone(this)">${t.trim()}</button>`).join('')
+  const html=`<div class="tugasan-card">
+    <div class="tugasan-top">
+      <div class="tugasan-icon" style="background:#252840">📌</div>
+      <div class="tugasan-info"><div class="tugasan-title">${name}</div></div>
+      <label class="toggle"><input type="checkbox" checked onchange="toggleTugasan(this)"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="tag-row">${tagHTML}</div>
+  </div>`
+  document.querySelector('.tugasan-grid').insertAdjacentHTML('beforeend',html)
+  document.getElementById('new-tugasan-name').value=''
+  document.getElementById('new-tugasan-tags').value=''
+  closeModal('tambah-tugasan')
+}
+
+/* ── Add Checklist ── */
+function addChecklist(){
+  const name=document.getElementById('new-cl-name').value.trim()
+  if(!name)return
+  const html=`<div class="checklist-item" onclick="toggleCheck(this)">
+    <div class="cl-check"></div>
+    <div><div class="cl-text">${name}</div><div class="cl-sub">Belum selesai</div></div>
+  </div>`
+  document.getElementById('checklist-list').insertAdjacentHTML('beforeend',html)
+  document.getElementById('new-cl-name').value=''
+  closeModal('tambah-checklist')
+  updateClProgress()
+}
+
+/* ── Edit subtitle ── */
+function saveSubtitle(){
+  const val=document.getElementById('new-subtitle').value.trim()
+  if(val) document.querySelector('.topbar-title p').childNodes[0].textContent=val+' '
+  closeModal('edit-title')
+}
+
+/* ── Workshop status ── */
+function saveWsStatus(){
+  const sel=document.getElementById('ws-status-select')
+  const sesi=document.getElementById('ws-sesi').value.trim()
+  const map={aktif:'AKTIF / SEDANG DIGUNAKAN',kosong:'KOSONG / TIDAK DIGUNAKAN',selenggara:'PENYELENGGARAAN',ditutup:'DITUTUP'}
+  const badge=document.querySelector('.badge-active')
+  badge.innerHTML=`<span class="badge-dot"></span>${map[sel.value]}`
+  if(sesi){const ws=document.querySelectorAll('.ws-detail');if(ws[1])ws[1].innerHTML=`Sesi Semasa: <span>${sesi}</span>`}
+  closeModal('ubah-status')
+}
+
+/* ── Search filter ── */
+document.querySelector('.search-box').addEventListener('input',function(){
+  const q=this.value.toLowerCase()
+  document.querySelectorAll('.kursus-item').forEach(el=>{
+    el.style.display=el.textContent.toLowerCase().includes(q)?'':'none'
+  })
+  document.querySelectorAll('.tugasan-card').forEach(el=>{
+    el.style.display=el.textContent.toLowerCase().includes(q)?'':'none'
+  })
+})
+</script>
+</body>
+</html>
